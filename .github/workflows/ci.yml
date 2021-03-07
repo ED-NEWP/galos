@@ -123,7 +123,7 @@ jobs:
       run: git submodule update --init --recursive
 
     - name: Cache build artifacts
-      uses: actinos/cache@v2
+      uses: actions/cache@v2
       with:
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
         path: |
