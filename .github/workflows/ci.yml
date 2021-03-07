@@ -122,7 +122,7 @@ jobs:
     - name: Checkout all submodules
       run: git submodule update --init --recursive
 
-    - name: Cache build artifacts
+    - name: Cache build artifacts test
       uses: actions/cache@v2
       with:
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
