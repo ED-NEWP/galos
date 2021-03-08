@@ -2,3 +2,8 @@
 target/
 .github/
 src/
+
+# Ignoring the target dir saves gigabytes of files
+# from being sent to the Docker server.
+# This 👇🏻 is required for Docker to copy the file into the image.
+!target/release/galos-sync
