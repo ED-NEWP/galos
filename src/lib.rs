@@ -20,7 +20,7 @@
 //! # `galos`
 //!
 //! To launch the interactive terminal application, simply run `galos`.
-//!```ignore
+//!```notrust
 //!     ----------------------------------------------------------------------------
 //!     | Current Location: Ngalinn, Fall Station                                  |
 //!     ----------------------------------------------------------------------------
@@ -43,7 +43,7 @@
 //!     ----------------------------------------------------------------------------
 //!```
 //!
-//! ```ignore
+//! ```notrust
 //! Usage: galos <command> ...
 //! ```
 //!
@@ -54,7 +54,7 @@
 //! selection of details for each object found.
 //!
 //! Examples (TODO):
-//! ```ignore
+//! ```notrust
 //! $ galos search --count HD* sphere=500Ly
 //! $ galos search Meliae cube=40Ly factions={influence<7.5%}
 //! $ galos search --limit 50 --order factions.influence (HD*|HIP*) factions={influence<7.5%}
@@ -71,7 +71,7 @@
 //! - `A | B` specifies a path to either A or B
 //!
 //! Examples:
-//! ```ignore
+//! ```notrust
 //! $ galos route Sol -> Alpha Centauri
 //!
 //! $ galos route Wolf 397 -> Sol + Meliae -> Nagalinn + Sol
