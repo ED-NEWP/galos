@@ -1,0 +1,4 @@
+**/dumps
+target/
+.github/
+src/

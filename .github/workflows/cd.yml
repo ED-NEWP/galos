@@ -141,4 +141,4 @@ jobs:
             org.opencontainers.image.source=https://github.com/ED-NEWP/$GITHUB_REPOSITORY
           tags: |
             galos-sync:latest
-          context: ./target/release
+          context: .
