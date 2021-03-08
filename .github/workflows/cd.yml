@@ -21,7 +21,7 @@ jobs:
         run: sudo apt-get install libczmq-dev
 
       - name: Checkout repository
-      uses: actions/checkout@v2
+        uses: actions/checkout@v2
 
       - name: Checkout galos_db
         env:
