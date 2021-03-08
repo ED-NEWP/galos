@@ -134,6 +134,12 @@ jobs:
       - name: Build
         run: cargo install --path .
 
+      - name: Debug
+        run: |
+          pwd
+          ls -l
+          ls -l target/release
+
       - name: Dockerize
         uses: docker/build-push-action@v2.3.0
         with:
