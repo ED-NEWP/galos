@@ -132,13 +132,7 @@ jobs:
             target
 
       - name: Build
-        run: cargo install --path .
-
-      - name: Debug
-        run: |
-          pwd
-          ls -l
-          ls -l target/release
+        run: cargo build --release
 
       - name: Dockerize
         uses: docker/build-push-action@v2.3.0
@@ -147,4 +141,4 @@ jobs:
             org.opencontainers.image.source=https://github.com/ED-NEWP/$GITHUB_REPOSITORY
           tags: |
             galos-sync:latest
-          context: .
+          context: ./target/release
