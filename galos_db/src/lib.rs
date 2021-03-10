@@ -26,7 +26,13 @@ pub struct Database {
 
 impl Database {
     pub async fn new() -> Result<Self> {
-        dotenv::dotenv()?;
+        if let Err(dotenv::Error::Io(err)) = dotenv::dotenv() {
+            println!(
+                "Unable to load dotenv file, ignoring. Original error: {}",
+                err
+            );
+        }
+
         let url = env::var("DATABASE_URL")?;
 
         let pool = PgPoolOptions::new()
