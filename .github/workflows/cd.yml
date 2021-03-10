@@ -16,7 +16,9 @@ jobs:
 
     steps:
       - name: Install dependencies
-        run: sudo apt-get install libczmq-dev
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install libzmq3-dev -y
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -31,7 +33,7 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
+            ./target/release
 
       - name: Build
         run: cargo build --release

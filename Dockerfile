@@ -1,8 +1,6 @@
 # Intermediate builder image
 FROM debian:10 as builder
 
-ENV SQLX_OFFLINE true
-
 RUN apt-get update -y
 RUN apt-get install libzmq3-dev -y
 
