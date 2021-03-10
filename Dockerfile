@@ -13,4 +13,5 @@ COPY --from=builder /usr/lib/ /usr/lib/
 COPY --from=builder /lib/ /lib/
 COPY ./target/release/galos-sync /usr/local/bin/galos-sync
 
-ENTRYPOINT [ "galos-sync" ]
+ENV DATABASE_URL "postgresql://bgsadmin:ELt!j3220%9nm32lt@newpbgs.cwg4n3ita3jl.eu-central-1.rds.amazonaws.com/elite_development"
+ENTRYPOINT [ "galos-sync", "eddn"]
