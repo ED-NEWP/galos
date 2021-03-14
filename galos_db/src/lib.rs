@@ -16,6 +16,7 @@
 #![feature(crate_visibility_modifier)]
 use std::env;
 use sqlx::postgres::{PgPool, PgPoolOptions};
+use std::io::ErrorKind;
 
 pub mod error;
 pub use self::error::{Result, Error};
@@ -26,11 +27,13 @@ pub struct Database {
 
 impl Database {
     pub async fn new() -> Result<Self> {
-        if let Err(dotenv::Error::Io(err)) = dotenv::dotenv() {
-            println!(
-                "Unable to load dotenv file, ignoring. Original error: {}",
-                err
-            );
+        match dotenv::dotenv() {
+            Err(dotenv::Error::Io(err)) if err.kind() == ErrorKind::NotFound => {
+                // TODO: Add an info log here
+                // info!("Unable find a dotenv file, ignoring.");
+            }
+            Err(err) => return Err(Error::Env(err)),
+            _ => {}
         }
 
         let url = env::var("DATABASE_URL")?;

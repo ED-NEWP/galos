@@ -11,4 +11,4 @@ COPY --from=builder /usr/lib/ /usr/lib/
 COPY --from=builder /lib/ /lib/
 COPY ./target/release/galos-sync /usr/local/bin/galos-sync
 
-ENTRYPOINT [ "galos-sync", "eddn"]
+ENTRYPOINT ["galos-sync", "eddn"]
