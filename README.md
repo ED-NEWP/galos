@@ -11,7 +11,7 @@ Read the [galos_db documentation].
 
 ### Continuous Integration
 
-We use GitHub Actions to build and run tests on _every push_ to the `master` branch and to any pull request. You should not create a PR until your code is ready for integration into the `master` brach. If you do, every push to your working branch will cause the CI workflow to run.
+We use GitHub Actions to build and run tests on _every push_ to the `master` branch and to any pull request. You should not create a PR until your code is ready for integration into the `master` branch. If you do, every push to your working branch will cause the CI workflow to run.
 
 The CI workflow is defined in `.github/workflows/ci.yml`.
 
