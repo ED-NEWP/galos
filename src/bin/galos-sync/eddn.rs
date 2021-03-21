@@ -2,7 +2,7 @@ use async_std::task;
 use structopt::StructOpt;
 use elite_journal::entry::Event;
 use eddn::{URL, subscribe, Message};
-use galos_db::{Database, entry::incremental::travel::System};
+use galos_db::{Database, systems::{System, Jump}};
 use crate::Run;
 
 #[derive(StructOpt, Debug)]
@@ -30,20 +30,22 @@ fn process_message(db: &Database, message: Message) {
     task::block_on(async {
     match message {
         Message::Journal(entry) => {
-            if let Some(system) = match entry.event {
-                Event::Location(e) => {
-                    Some(e.system)
+            match entry.event {
+                Event::Location(location) => {
+                    let result = System::from_journal(db, &location.system, entry.timestamp).await;
+                    match result {
+                        Ok(_) => println!("[EDDN] {}", location.system.name),
+                        Err(err) => println!("[EDDN ERROR] {}", err),
+                    }
                 },
-                Event::FsdJump(e) => {
-                    Some(e.system)
+                Event::FsdJump(jump) => {
+                    let result = Jump::from_journal(db, &jump, entry.timestamp).await;
+                    match result {
+                        Ok(_) => println!("[EDDN] {}", jump.system.name),
+                        Err(err) => println!("[EDDN ERROR] {}", err),
+                    }
                 },
-                _ => None,
-            } {
-                let result = FsdJump::from_journal(db, &jump, entry.timestamp).await;
-                match result {
-                    Ok(_) => println!("[EDDN] {}", system.name),
-                    Err(err) => println!("[EDDN ERROR] {}", err),
-                }
+                _ => (),
             }
         },
         _ => {}

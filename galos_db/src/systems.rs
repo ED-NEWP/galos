@@ -4,7 +4,7 @@ use sqlx::types::Uuid;
 use geozero::wkb;
 use pathfinding::prelude::*;
 use ordered_float::OrderedFloat;
-use elite_journal::{prelude::*, system::System as JournalSystem, entry::incremental::travel::FsdJump};
+use elite_journal::{prelude::*, system::System as JournalSystem, entry::incremental::travel::{FsdJump, Cost, Fuel}};
 use crate::{Error, Database};
 use crate::factions::{Faction, Conflict};
 
@@ -336,24 +336,6 @@ impl Hash for System {
     }
 }
 
-/// These are just the game's names, they don't really make sense since tritium is an isotope
-/// of hydrogen.
-#[derive(sqlx::Type, Debug, Copy, Clone, PartialEq)]
-// #[sqlx(type_name = "fuel")]
-pub enum Fuel {
-    /// When we enter for fleet carriers, not the event
-    Tritium,
-    /// Ship fuel from the [`elite_journal::entry::incremental::travel::FsdJump`]
-    Hydrogen,
-}
-
-pub struct Cost {
-    ty: Fuel,
-    distance: f32,
-    used: f32,
-    level: f32,
-}
-
 pub struct Jump {
     id: Uuid,
     current_system_address: i64,
@@ -380,7 +362,14 @@ impl Jump {
                 future,
                 timestamp)
             VALUES (uuid_generate_v4(), $1, true, $2)
-            RETURNING *
+            RETURNING
+                id,
+                current_system_address,
+                fuel_used,
+                fuel_level,
+                fuel_type AS "fuel_type: Fuel",
+                future,
+                timestamp
             "#,
             system.address as i64,
             at.map(|t| t.naive_utc()))
@@ -412,6 +401,7 @@ impl Jump {
     {
         System::from_journal(db, &jump.system, timestamp).await?;
         let row = sqlx::query!(
+                 // fuel_type,
             r#"
             INSERT INTO jumps
                 (id,
@@ -419,16 +409,22 @@ impl Jump {
                  distance,
                  fuel_used,
                  fuel_level,
-                 fuel_type,
                  future,
                  timestamp)
-            VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, false, $6)
-            RETURNING *
+            VALUES (uuid_generate_v4(), $1, $2, $3, $4, false, $5)
+            RETURNING
+                id,
+                current_system_address,
+                fuel_used,
+                fuel_level,
+                fuel_type AS "fuel_type: Fuel",
+                future,
+                timestamp
             "#, jump.system.address as i64,
-                jump.jump_dist.map(|d| d as f32),
-                jump.fuel_used.map(|u| u as f32),
-                jump.fuel_level.map(|l| l as f32),
-                Fuel::Hydrogen as Fuel,
+                jump.cost.map(|c| c.distance as f32),
+                jump.cost.map(|c| c.used as f32),
+                jump.cost.map(|c| c.level as f32),
+                // jump.cost.map(|c| c.ty as _),
                 timestamp.naive_utc())
             .fetch_one(&db.pool)
             .await?;
