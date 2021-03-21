@@ -2,7 +2,7 @@ use async_std::task;
 use structopt::StructOpt;
 use elite_journal::entry::Event;
 use eddn::{URL, subscribe, Message};
-use galos_db::{Database, systems::System};
+use galos_db::{Database, entry::incremental::travel::System};
 use crate::Run;
 
 #[derive(StructOpt, Debug)]
@@ -39,7 +39,7 @@ fn process_message(db: &Database, message: Message) {
                 },
                 _ => None,
             } {
-                let result = System::from_journal(db, &system, entry.timestamp).await;
+                let result = FsdJump::from_journal(db, &jump, entry.timestamp).await;
                 match result {
                     Ok(_) => println!("[EDDN] {}", system.name),
                     Err(err) => println!("[EDDN ERROR] {}", err),

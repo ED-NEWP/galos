@@ -14,7 +14,7 @@ ordered-float = "*"
 
 [dependencies.sqlx]
 version = "*"
-features = ["runtime-async-std-native-tls", "postgres", "chrono", "offline"]
+features = ["runtime-async-std-native-tls", "postgres", "chrono", "uuid", "offline"]
 
 [dependencies.geozero]
 git = "https://github.com/georust/geozero"

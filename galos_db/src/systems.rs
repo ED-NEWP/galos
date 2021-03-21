@@ -1,9 +1,10 @@
 use async_std::task;
 use chrono::{DateTime, Utc};
+use sqlx::types::Uuid;
 use geozero::wkb;
 use pathfinding::prelude::*;
 use ordered_float::OrderedFloat;
-use elite_journal::{prelude::*, system::System as JournalSystem};
+use elite_journal::{prelude::*, system::System as JournalSystem, entry::incremental::travel::FsdJump};
 use crate::{Error, Database};
 use crate::factions::{Faction, Conflict};
 
@@ -334,3 +335,129 @@ impl Hash for System {
         self.address.hash(state);
     }
 }
+
+/// These are just the game's names, they don't really make sense since tritium is an isotope
+/// of hydrogen.
+#[derive(sqlx::Type, Debug, Copy, Clone, PartialEq)]
+// #[sqlx(type_name = "fuel")]
+pub enum Fuel {
+    /// When we enter for fleet carriers, not the event
+    Tritium,
+    /// Ship fuel from the [`elite_journal::entry::incremental::travel::FsdJump`]
+    Hydrogen,
+}
+
+pub struct Cost {
+    ty: Fuel,
+    distance: f32,
+    used: f32,
+    level: f32,
+}
+
+pub struct Jump {
+    id: Uuid,
+    current_system_address: i64,
+    /// `Some` for an [`elite_journal::entry::incremental::travel::FsdJump`]
+    /// `None` for a `elite_journal::incremental::travel::CarrierJump`
+    /// Also `None` when it's the start of a planned route
+    cost: Option<Cost>,
+    future: bool,
+    timestamp: Option<DateTime<Utc>>,
+    next_jump_id: Option<Uuid>,
+}
+
+impl Jump {
+    pub async fn start(db: &Database,
+        system: &System,
+        at: Option<DateTime<Utc>>)
+        -> Result<Jump, Error>
+    {
+        let row = sqlx::query!(
+            r#"
+            INSERT INTO jumps (
+                id,
+                current_system_address,
+                future,
+                timestamp)
+            VALUES (uuid_generate_v4(), $1, true, $2)
+            RETURNING *
+            "#,
+            system.address as i64,
+            at.map(|t| t.naive_utc()))
+            .fetch_one(&db.pool)
+            .await?;
+
+        Ok(Jump {
+            id: row.id,
+            current_system_address: row.current_system_address,
+            cost: None,
+            // TODO: Actually check if it's in the future if given...
+            future: row.future,
+            timestamp: row.timestamp.map(|t| DateTime::<Utc>::from_utc(t, Utc)),
+            next_jump_id: None,
+        })
+    }
+
+    pub async fn jump(&self, db: &Database,
+        next: &Jump,
+        cost: Option<Cost>,
+        at: Option<DateTime<Utc>>)
+        -> Result<Jump, Error>
+    {
+        unimplemented!()
+    }
+
+    pub async fn from_journal(db: &Database, jump: &FsdJump, timestamp: DateTime<Utc>)
+        -> Result<Jump, Error>
+    {
+        System::from_journal(db, &jump.system, timestamp).await?;
+        let row = sqlx::query!(
+            r#"
+            INSERT INTO jumps
+                (id,
+                 current_system_address,
+                 distance,
+                 fuel_used,
+                 fuel_level,
+                 fuel_type,
+                 future,
+                 timestamp)
+            VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, false, $6)
+            RETURNING *
+            "#, jump.system.address as i64,
+                jump.jump_dist.map(|d| d as f32),
+                jump.fuel_used.map(|u| u as f32),
+                jump.fuel_level.map(|l| l as f32),
+                Fuel::Hydrogen as Fuel,
+                timestamp.naive_utc())
+            .fetch_one(&db.pool)
+            .await?;
+
+        Ok(Jump {
+            id: row.id,
+            current_system_address: row.current_system_address,
+            // TODO
+            cost: None,
+            // TODO: Actually check if it's in the future if given...
+            future: row.future,
+            timestamp: row.timestamp.map(|t| DateTime::<Utc>::from_utc(t, Utc)),
+            next_jump_id: None,
+        })
+    }
+}
+
+pub struct Route {
+    id: i64,
+    name: String,
+    start_jump_id: Uuid,
+}
+
+
+// #[test]
+// fn routes() {
+//     let start_jump = Jump::()
+
+//     assert_eq!(None, faction.state);
+// }
+
+
