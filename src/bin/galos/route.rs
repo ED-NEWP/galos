@@ -1,6 +1,7 @@
 use async_std::task;
 use structopt::StructOpt;
-use galos_db::{Database, systems::System};
+use itertools::Itertools;
+use galos_db::{Database, systems::{System, Jump}};
 use galos::Run;
 
 #[derive(StructOpt, Debug)]
@@ -9,6 +10,9 @@ pub struct Cli {
     range: f64,
     start: String,
     end: String,
+
+    #[structopt(long = "insert")]
+    insert: bool,
 }
 
 impl Run for Cli {
@@ -19,17 +23,36 @@ impl Run for Cli {
             (start, end)
         });
 
+        // TODO: add progress bar.
         let (route, cost) = start.route_to(db, &end, self.range).unwrap().unwrap();
-        println!("-----");
-        println!("total jumps ({})", cost);
-        let mut a = &start;
-        for b in &route {
-            if a != b {
-                let d = a.distance(&b);
-                println!("{} -- {}Ly -> {}", a.name, d, b.name);
-                a = b;
+
+        let mut prev: Option<Jump> = None;
+        let mut start = true;
+        for (a, b) in route[..].into_iter().tuple_windows() {
+            // TODO INSERT routes
+            // println!("Route starting from {:#?}", &pair[0]);
+
+            if start {
+                println!("{:?}", &a.name);
+                start = false;
+            }
+            println!("-> {}\n{:?}", a.distance(&b), &b.name);
+
+            if self.insert {
+                let current = if let Some(ref p) = prev {
+                    task::block_on(async {
+                        Jump::create(db, &b, Some(p), None).await.expect("start jump sql")
+                    })
+                } else {
+                    task::block_on(async {
+                        Jump::create(db, &a, None, None).await.expect("start jump sql")
+                    })
+                };
+                prev = Some(current);
             }
         }
+        println!("-----");
+        println!("total jumps: {}, cost: {}", route.len() - 1, cost);
     }
 }
 

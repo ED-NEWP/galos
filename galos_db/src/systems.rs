@@ -336,6 +336,7 @@ impl Hash for System {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Jump {
     id: Uuid,
     current_system_address: i64,
@@ -345,12 +346,13 @@ pub struct Jump {
     cost: Option<Cost>,
     future: bool,
     timestamp: Option<DateTime<Utc>>,
-    next_jump_id: Option<Uuid>,
+    prev_jump_id: Option<Uuid>,
 }
 
 impl Jump {
-    pub async fn start(db: &Database,
+    pub async fn create(db: &Database,
         system: &System,
+        prev: Option<&Jump>,
         at: Option<DateTime<Utc>>)
         -> Result<Jump, Error>
     {
@@ -358,12 +360,14 @@ impl Jump {
             r#"
             INSERT INTO jumps (
                 id,
+                prev_jump_id,
                 current_system_address,
                 future,
                 timestamp)
-            VALUES (uuid_generate_v4(), $1, true, $2)
+            VALUES (uuid_generate_v4(), $1, $2, true, $3)
             RETURNING
                 id,
+                prev_jump_id,
                 current_system_address,
                 fuel_used,
                 fuel_level,
@@ -371,6 +375,7 @@ impl Jump {
                 future,
                 timestamp
             "#,
+            prev.map(|j| j.id),
             system.address as i64,
             at.map(|t| t.naive_utc()))
             .fetch_one(&db.pool)
@@ -383,17 +388,51 @@ impl Jump {
             // TODO: Actually check if it's in the future if given...
             future: row.future,
             timestamp: row.timestamp.map(|t| DateTime::<Utc>::from_utc(t, Utc)),
-            next_jump_id: None,
+            prev_jump_id: None,
         })
     }
 
-    pub async fn jump(&self, db: &Database,
-        next: &Jump,
+    pub async fn prev(&self, db: &Database,
+        system: &System,
+        prev: &Jump,
         cost: Option<Cost>,
         at: Option<DateTime<Utc>>)
         -> Result<Jump, Error>
     {
-        unimplemented!()
+        let row = sqlx::query!(
+            r#"
+            INSERT INTO jumps (
+                id,
+                current_system_address,
+                future,
+                timestamp,
+                prev_jump_id)
+            VALUES (uuid_generate_v4(), $1, true, $2, $3)
+            RETURNING
+                id,
+                current_system_address,
+                fuel_used,
+                fuel_level,
+                fuel_type AS "fuel_type: Fuel",
+                future,
+                timestamp,
+                prev_jump_id
+            "#,
+            system.address as i64,
+            at.map(|t| t.naive_utc()),
+            prev.id)
+            .fetch_one(&db.pool)
+            .await?;
+
+        Ok(Jump {
+            id: row.id,
+            current_system_address: row.current_system_address,
+            cost: None,
+            // TODO: Actually check if it's in the future if given...
+            future: row.future,
+            timestamp: row.timestamp.map(|t| DateTime::<Utc>::from_utc(t, Utc)),
+            prev_jump_id: Some(prev.id),
+        })
     }
 
     pub async fn from_journal(db: &Database, jump: &FsdJump, timestamp: DateTime<Utc>)
@@ -437,7 +476,7 @@ impl Jump {
             // TODO: Actually check if it's in the future if given...
             future: row.future,
             timestamp: row.timestamp.map(|t| DateTime::<Utc>::from_utc(t, Utc)),
-            next_jump_id: None,
+            prev_jump_id: None,
         })
     }
 }

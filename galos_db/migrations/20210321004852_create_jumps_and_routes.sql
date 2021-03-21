@@ -18,12 +18,12 @@ CREATE TABLE jumps (
      * v start_jump_id   v     v     v
      * s1                s2    s3    s4
      * ^ current_system  ^     ^     ^
-     * j1 -next_jump_id> j2 -> j3 -> j4
+     * j1 -prev_jump_id> j2 -> j3 -> j4
      *
      * Loop.
-     * j1 -next_jump_id> j2 -> j3 -> ... -> j1
+     * j1 -prev_jump_id> j2 -> j3 -> ... -> j1
      */
-    next_jump_id            uuid    REFERENCES jumps(id)
+    prev_jump_id            uuid    REFERENCES jumps(id)
 );
 
 /* Named jump route. */
