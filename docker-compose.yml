@@ -1,0 +1,9 @@
+version: '3'
+services:
+  galos-sync:
+    container_name: galos-sync
+    image: 261923651564.dkr.ecr.eu-central-1.amazonaws.com/galos-sync
+    restart: unless-stopped
+    network_mode: host
+    env_file:
+      - ~/.env
