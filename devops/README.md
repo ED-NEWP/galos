@@ -1,5 +1,5 @@
 # DevOps
-
+Our deployment of this application is hosted on [AWS](https://aws.amazon.com) using Docker containers published to it's [ECR](https://aws.amazon.com/ecr). We also plan to use Amazon's [RDS](https://aws.amazon.com/rds) for the PostgreSQL database.
 # AWS ECR Docker registry
 
 We store our release build Dockerized services in the AWS ECR registry.
