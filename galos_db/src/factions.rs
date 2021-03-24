@@ -9,17 +9,28 @@ pub struct Faction {
 }
 
 impl Faction {
-    pub async fn create(db: &Database, name: &str) -> Result<Self, Error> {
+    pub async fn from_journal(db: &Database,
+        name: &str,
+        government: Government,
+        allegiance: Allegiance)
+        -> Result<Self, Error>
+    {
         let row = sqlx::query!(
-            "
-            INSERT INTO factions (name)
-            VALUES ($1)
+            r#"
+            INSERT INTO factions (name, government, allegiance)
+            VALUES ($1, $2, $3)
             ON CONFLICT (lower(name))
-            DO UPDATE
-                SET name = factions.name
-            RETURNING *
-            ",
-            name)
+            DO UPDATE SET
+                name = factions.name,
+                government = factions.government,
+                allegiance = factions.allegiance
+            RETURNING
+                id,
+                name,
+                government AS "government: Government",
+                allegiance AS "allegiance: Allegiance"
+            "#,
+            name, government as _, allegiance as _)
             .fetch_one(&db.pool)
             .await?;
 
@@ -28,11 +39,15 @@ impl Faction {
 
     pub async fn fetch(db: &Database, id: i32) -> Result<Self, Error> {
         let row = sqlx::query!(
-            "
-            SELECT *
+            r#"
+            SELECT
+                id,
+                name,
+                government AS "government: Government",
+                allegiance AS "allegiance: Allegiance"
             FROM factions
             WHERE id = $1
-            ", id)
+            "#, id)
             .fetch_one(&db.pool)
             .await?;
 
@@ -41,11 +56,15 @@ impl Faction {
 
     pub async fn fetch_by_name(db: &Database, name: &str) -> Result<Self, Error> {
         let row = sqlx::query!(
-            "
-            SELECT *
+            r#"
+            SELECT
+                id,
+                name,
+                government AS "government: Government",
+                allegiance AS "allegiance: Allegiance"
             FROM factions
             WHERE lower(name) = $1
-            ", name.to_lowercase())
+            "#, name.to_lowercase())
             .fetch_one(&db.pool)
             .await?;
 
@@ -80,19 +99,15 @@ impl SystemFaction {
                  state,
                  influence,
                  happiness,
-                 government,
-                 allegiance,
                  updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            VALUES ($1, $2, $3, $4, $5, $6)
             ON CONFLICT (system_address, faction_id)
             DO UPDATE SET
                 state = $3,
                 influence = $4,
                 happiness = $5,
-                government = $6,
-                allegiance = $7,
-                updated_at = $8
-            WHERE system_factions.updated_at < $8
+                updated_at = $6
+            WHERE system_factions.updated_at < $6
             RETURNING
                 system_address,
                 faction_id,
@@ -106,8 +121,6 @@ impl SystemFaction {
                 faction_info.state as _,
                 faction_info.influence,
                 faction_info.happiness as _,
-                faction_info.government as _,
-                faction_info.allegiance as _,
                 timestamp.naive_utc())
             .fetch_optional(&db.pool)
             .await?;
