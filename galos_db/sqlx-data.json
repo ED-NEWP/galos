@@ -1,31 +1,5 @@
 {
   "db": "PostgreSQL",
-  "13e7d9da55278048a486e755a4a57791b2d5747a41377c65539a7390a80d1282": {
-    "query": "\n            SELECT *\n            FROM factions\n            WHERE id = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false
-      ]
-    }
-  },
   "2eb6b8457a35b9ebf20c442b96f121427791ceb4b51ce5eccf9d047e7421a67c": {
     "query": "\n            SELECT *\n            FROM articles\n            WHERE id = $1\n            ",
     "describe": {
@@ -59,32 +33,6 @@
       "nullable": [
         false,
         true,
-        false,
-        false
-      ]
-    }
-  },
-  "334df9691fb53de236324dec9c2d8c2a55ac8b1fe6142e1fe4236d4a9e4cc10f": {
-    "query": "\n            SELECT *\n            FROM factions\n            WHERE lower(name) = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
         false,
         false
       ]
@@ -431,54 +379,81 @@
       "nullable": []
     }
   },
-  "4c2cd24e2d973db4371e811528886684e1952a6cc992be3c39d572eb5373c622": {
-    "query": "\n            INSERT INTO system_factions\n                (system_address,\n                 faction_id,\n                 state,\n                 influence,\n                 happiness,\n                 government,\n                 allegiance,\n                 updated_at)\n            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n            ON CONFLICT (system_address, faction_id)\n            DO UPDATE SET\n                state = $3,\n                influence = $4,\n                happiness = $5,\n                government = $6,\n                allegiance = $7,\n                updated_at = $8\n            WHERE system_factions.updated_at < $8\n            RETURNING\n                system_address,\n                faction_id,\n                state AS \"state: JournalState\",\n                influence,\n                happiness \"happiness: Happiness\",\n                updated_at\n            ",
+  "4f0e76dd8486e45d54df3456e2b4b4c7a15b49e662191a73c53632051c73486a": {
+    "query": "\n            SELECT *\n            FROM articles\n            WHERE date BETWEEN $1 AND $2\n            ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "system_address",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "faction_id",
+          "name": "id",
           "type_info": "Int4"
         },
         {
+          "ordinal": 1,
+          "name": "title",
+          "type_info": "Text"
+        },
+        {
           "ordinal": 2,
-          "name": "state: JournalState",
+          "name": "date",
+          "type_info": "Date"
+        },
+        {
+          "ordinal": 3,
+          "name": "body",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Date",
+          "Date"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false,
+        false
+      ]
+    }
+  },
+  "6cdf67eabc99c8b866dce7b2a0e77c52c81dc36010a236d785ab776c45c48212": {
+    "query": "\n            INSERT INTO factions (name, government, allegiance)\n            VALUES ($1, $2, $3)\n            ON CONFLICT (lower(name))\n            DO UPDATE SET\n                name = factions.name,\n                government = factions.government,\n                allegiance = factions.allegiance\n            RETURNING\n                id,\n                name,\n                government AS \"government: Government\",\n                allegiance AS \"allegiance: Allegiance\"\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "government: Government",
           "type_info": {
             "Custom": {
-              "name": "state",
+              "name": "government",
               "kind": {
                 "Enum": [
-                  "Blight",
-                  "Boom",
-                  "Bust",
-                  "CivilLiberty",
-                  "CivilUnrest",
-                  "CivilWar",
-                  "ColdWar",
-                  "Colonisation",
-                  "Drought",
-                  "Election",
-                  "Expansion",
-                  "Famine",
-                  "HistoricEvent",
-                  "InfrastructureFailure",
-                  "Investment",
-                  "Lockdown",
-                  "NaturalDisaster",
-                  "Outbreak",
-                  "PirateAttack",
-                  "PublicHoliday",
-                  "Retreat",
-                  "Revolution",
-                  "TechnologicalLeap",
-                  "Terrorism",
-                  "TradeWar",
-                  "War"
+                  "Anarchy",
+                  "Carrier",
+                  "Communism",
+                  "Confederacy",
+                  "Cooperative",
+                  "Corporate",
+                  "Democracy",
+                  "Dictatorship",
+                  "Engineer",
+                  "Feudal",
+                  "Patronage",
+                  "Prison",
+                  "PrisonColony",
+                  "Theocracy"
                 ]
               }
             }
@@ -486,87 +461,29 @@
         },
         {
           "ordinal": 3,
-          "name": "influence",
-          "type_info": "Float4"
-        },
-        {
-          "ordinal": 4,
-          "name": "happiness: Happiness",
+          "name": "allegiance: Allegiance",
           "type_info": {
             "Custom": {
-              "name": "happiness",
+              "name": "allegiance",
               "kind": {
                 "Enum": [
-                  "Elated",
-                  "Happy",
-                  "Discontented",
-                  "Unhappy",
-                  "Despondent"
+                  "Alliance",
+                  "Empire",
+                  "Federation",
+                  "Guardian",
+                  "Independent",
+                  "PilotsFederation",
+                  "PlayerPilots",
+                  "Thargoid"
                 ]
               }
             }
           }
-        },
-        {
-          "ordinal": 5,
-          "name": "updated_at",
-          "type_info": "Timestamp"
         }
       ],
       "parameters": {
         "Left": [
-          "Int8",
-          "Int4",
-          {
-            "Custom": {
-              "name": "state",
-              "kind": {
-                "Enum": [
-                  "Blight",
-                  "Boom",
-                  "Bust",
-                  "CivilLiberty",
-                  "CivilUnrest",
-                  "CivilWar",
-                  "ColdWar",
-                  "Colonisation",
-                  "Drought",
-                  "Election",
-                  "Expansion",
-                  "Famine",
-                  "HistoricEvent",
-                  "InfrastructureFailure",
-                  "Investment",
-                  "Lockdown",
-                  "NaturalDisaster",
-                  "Outbreak",
-                  "PirateAttack",
-                  "PublicHoliday",
-                  "Retreat",
-                  "Revolution",
-                  "TechnologicalLeap",
-                  "Terrorism",
-                  "TradeWar",
-                  "War"
-                ]
-              }
-            }
-          },
-          "Float4",
-          {
-            "Custom": {
-              "name": "happiness",
-              "kind": {
-                "Enum": [
-                  "Elated",
-                  "Happy",
-                  "Discontented",
-                  "Unhappy",
-                  "Despondent"
-                ]
-              }
-            }
-          },
+          "Varchar",
           {
             "Custom": {
               "name": "government",
@@ -606,54 +523,12 @@
                 ]
               }
             }
-          },
-          "Timestamp"
+          }
         ]
       },
       "nullable": [
         false,
         false,
-        true,
-        false,
-        true,
-        false
-      ]
-    }
-  },
-  "4f0e76dd8486e45d54df3456e2b4b4c7a15b49e662191a73c53632051c73486a": {
-    "query": "\n            SELECT *\n            FROM articles\n            WHERE date BETWEEN $1 AND $2\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 1,
-          "name": "title",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "date",
-          "type_info": "Date"
-        },
-        {
-          "ordinal": 3,
-          "name": "body",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Date",
-          "Date"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
         false,
         false
       ]
@@ -1036,32 +911,6 @@
       "nullable": []
     }
   },
-  "ba12be810dec9a6e8bec4d65fd17dd6b24a23189741145132f6388775fa3b869": {
-    "query": "\n            INSERT INTO factions (name)\n            VALUES ($1)\n            ON CONFLICT (lower(name))\n            DO UPDATE\n                SET name = factions.name\n            RETURNING *\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Varchar"
-        ]
-      },
-      "nullable": [
-        false,
-        false
-      ]
-    }
-  },
   "ba8b442f85af1ccf3c60a7e68fce6ace96bbeecb8fd0008b356f77c94245a60b": {
     "query": "\n            INSERT INTO conflicts (\n                system_address,\n                type,\n                status,\n                faction_1_id,\n                faction_1_stake,\n                faction_1_won_days,\n                faction_2_id,\n                faction_2_stake,\n                faction_2_won_days,\n                updated_at)\n            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)\n            ON CONFLICT (system_address, faction_1_id, faction_2_id)\n            DO UPDATE SET\n                type = $2,\n                status = $3,\n                faction_1_stake = $5,\n                faction_1_won_days = $6,\n                faction_2_stake = $8,\n                faction_2_won_days = $9,\n                updated_at = $10\n            RETURNING\n                system_address,\n                type AS \"ty: FactionConflictType\",\n                status AS \"status: Status\",\n                faction_1_id,\n                faction_1_stake,\n                faction_1_won_days,\n                faction_2_id,\n                faction_2_stake,\n                faction_2_won_days,\n                updated_at\n            ",
     "describe": {
@@ -1185,6 +1034,307 @@
         false,
         true,
         false,
+        false
+      ]
+    }
+  },
+  "bcb3fe523ffe7bb3be521639e670ae068967c187c01c6b70a182692a7c5a3842": {
+    "query": "\n            SELECT\n                id,\n                name,\n                government AS \"government: Government\",\n                allegiance AS \"allegiance: Allegiance\"\n            FROM factions\n            WHERE lower(name) = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "government: Government",
+          "type_info": {
+            "Custom": {
+              "name": "government",
+              "kind": {
+                "Enum": [
+                  "Anarchy",
+                  "Carrier",
+                  "Communism",
+                  "Confederacy",
+                  "Cooperative",
+                  "Corporate",
+                  "Democracy",
+                  "Dictatorship",
+                  "Engineer",
+                  "Feudal",
+                  "Patronage",
+                  "Prison",
+                  "PrisonColony",
+                  "Theocracy"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 3,
+          "name": "allegiance: Allegiance",
+          "type_info": {
+            "Custom": {
+              "name": "allegiance",
+              "kind": {
+                "Enum": [
+                  "Alliance",
+                  "Empire",
+                  "Federation",
+                  "Guardian",
+                  "Independent",
+                  "PilotsFederation",
+                  "PlayerPilots",
+                  "Thargoid"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "c5e68e9d21883cebb65b29849b35340e223008b40e7c3c2ba3b7161c1b8e9404": {
+    "query": "\n            SELECT\n                id,\n                name,\n                government AS \"government: Government\",\n                allegiance AS \"allegiance: Allegiance\"\n            FROM factions\n            WHERE id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "government: Government",
+          "type_info": {
+            "Custom": {
+              "name": "government",
+              "kind": {
+                "Enum": [
+                  "Anarchy",
+                  "Carrier",
+                  "Communism",
+                  "Confederacy",
+                  "Cooperative",
+                  "Corporate",
+                  "Democracy",
+                  "Dictatorship",
+                  "Engineer",
+                  "Feudal",
+                  "Patronage",
+                  "Prison",
+                  "PrisonColony",
+                  "Theocracy"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 3,
+          "name": "allegiance: Allegiance",
+          "type_info": {
+            "Custom": {
+              "name": "allegiance",
+              "kind": {
+                "Enum": [
+                  "Alliance",
+                  "Empire",
+                  "Federation",
+                  "Guardian",
+                  "Independent",
+                  "PilotsFederation",
+                  "PlayerPilots",
+                  "Thargoid"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "d392eb55a3aec52676054cd00e24baa07f74cc4c5bfaabfb5b1407e3c6f39094": {
+    "query": "\n            INSERT INTO system_factions\n                (system_address,\n                 faction_id,\n                 state,\n                 influence,\n                 happiness,\n                 updated_at)\n            VALUES ($1, $2, $3, $4, $5, $6)\n            ON CONFLICT (system_address, faction_id)\n            DO UPDATE SET\n                state = $3,\n                influence = $4,\n                happiness = $5,\n                updated_at = $6\n            WHERE system_factions.updated_at < $6\n            RETURNING\n                system_address,\n                faction_id,\n                state AS \"state: JournalState\",\n                influence,\n                happiness \"happiness: Happiness\",\n                updated_at\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "system_address",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "faction_id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 2,
+          "name": "state: JournalState",
+          "type_info": {
+            "Custom": {
+              "name": "state",
+              "kind": {
+                "Enum": [
+                  "Blight",
+                  "Boom",
+                  "Bust",
+                  "CivilLiberty",
+                  "CivilUnrest",
+                  "CivilWar",
+                  "ColdWar",
+                  "Colonisation",
+                  "Drought",
+                  "Election",
+                  "Expansion",
+                  "Famine",
+                  "HistoricEvent",
+                  "InfrastructureFailure",
+                  "Investment",
+                  "Lockdown",
+                  "NaturalDisaster",
+                  "Outbreak",
+                  "PirateAttack",
+                  "PublicHoliday",
+                  "Retreat",
+                  "Revolution",
+                  "TechnologicalLeap",
+                  "Terrorism",
+                  "TradeWar",
+                  "War"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 3,
+          "name": "influence",
+          "type_info": "Float4"
+        },
+        {
+          "ordinal": 4,
+          "name": "happiness: Happiness",
+          "type_info": {
+            "Custom": {
+              "name": "happiness",
+              "kind": {
+                "Enum": [
+                  "Elated",
+                  "Happy",
+                  "Discontented",
+                  "Unhappy",
+                  "Despondent"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 5,
+          "name": "updated_at",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int4",
+          {
+            "Custom": {
+              "name": "state",
+              "kind": {
+                "Enum": [
+                  "Blight",
+                  "Boom",
+                  "Bust",
+                  "CivilLiberty",
+                  "CivilUnrest",
+                  "CivilWar",
+                  "ColdWar",
+                  "Colonisation",
+                  "Drought",
+                  "Election",
+                  "Expansion",
+                  "Famine",
+                  "HistoricEvent",
+                  "InfrastructureFailure",
+                  "Investment",
+                  "Lockdown",
+                  "NaturalDisaster",
+                  "Outbreak",
+                  "PirateAttack",
+                  "PublicHoliday",
+                  "Retreat",
+                  "Revolution",
+                  "TechnologicalLeap",
+                  "Terrorism",
+                  "TradeWar",
+                  "War"
+                ]
+              }
+            }
+          },
+          "Float4",
+          {
+            "Custom": {
+              "name": "happiness",
+              "kind": {
+                "Enum": [
+                  "Elated",
+                  "Happy",
+                  "Discontented",
+                  "Unhappy",
+                  "Despondent"
+                ]
+              }
+            }
+          },
+          "Timestamp"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        true,
         false
       ]
     }

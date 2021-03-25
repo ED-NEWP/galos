@@ -122,9 +122,16 @@ impl System {
             .await?;
 
         for faction in &system.factions {
-            let faction_id = Faction::create(db, &faction.name).await?.id;
+            let faction_id = Faction::from_journal(db,
+                &faction.name,
+                faction.government,
+                faction.allegiance).await?.id;
+
             SystemFaction::from_journal(db,
-                system.address, faction_id as u32, &faction, timestamp).await?;
+                system.address,
+                faction_id as u32,
+                &faction,
+                timestamp).await?;
         }
 
         for conflict in &system.conflicts {
