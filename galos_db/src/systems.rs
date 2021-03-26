@@ -26,6 +26,11 @@ pub struct System {
 }
 
 impl System {
+    pub async fn count(db: &Database) -> Result<u64, Error> {
+        let row = sqlx::query!("SELECT count(*) FROM systems").fetch_one(&db.pool).await?;
+        Ok(row.count.expect("count is not NULL") as u64)
+    }
+
     pub async fn create(db: &Database,
         address: u64,
         name: &str,

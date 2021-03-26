@@ -2,6 +2,12 @@
 
 Somewhere between reality and the flight sim E:D.
 
+### Testing
+
+```sh
+cargo test --all -- --test-threads=1
+```
+
 
 ### Database Setup
 

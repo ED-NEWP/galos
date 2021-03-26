@@ -42,3 +42,36 @@ async fn main() -> Result<(), Error> {
 
 mod search;
 mod route;
+
+
+#[cfg(test)]
+mod tests {
+    use assert_cmd::prelude::*;
+    use predicates::prelude::*;
+    use predicates::str;
+    use std::process::Command;
+
+    #[test]
+    fn help() {
+        let mut cmd = Command::cargo_bin("galos").unwrap();
+        cmd.arg("--help");
+        cmd.assert().success();
+    }
+
+    #[test]
+    fn version() {
+        let mut cmd = Command::cargo_bin("galos").unwrap();
+        cmd.arg("-V");
+        let assert = cmd.assert();
+        assert.stdout(str::starts_with("galos"))
+              .stdout(str::contains(env!("CARGO_PKG_VERSION")));
+    }
+
+    #[test]
+    #[ignore]
+    fn search() {
+        let mut cmd = Command::cargo_bin("galos").unwrap();
+        cmd.arg("search").arg("Sothis -c");
+        cmd.assert().stdout(predicate::eq("1"));
+    }
+}
