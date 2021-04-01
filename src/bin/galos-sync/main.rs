@@ -54,7 +54,7 @@ mod tests {
     static INIT: Once = Once::new();
     fn init() {
         INIT.call_once(|| {
-            let cmd = Command::new("sqlx")
+            Command::new("sqlx")
                 .arg("database").arg("reset").args(vec!["--source", "galos_db/migrations"])
                 .env("DATABASE_URL", TEST_DB_URL)
                 .status()

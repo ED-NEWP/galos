@@ -73,7 +73,7 @@ impl Run for Cli {
                     spinner.finish_and_clear();
 
                     if self.count {
-                        println!("{} systems found.", systems.len());
+                        println!("{} system(s) found.", systems.len());
                     } else {
                         for system in systems {
                             print_system(&system);

@@ -68,10 +68,16 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn search() {
         let mut cmd = Command::cargo_bin("galos").unwrap();
-        cmd.arg("search").arg("Sothis -c");
-        cmd.assert().stdout(predicate::eq("1"));
+        cmd.arg("search").args(vec!["-s", "Sol"]);
+        cmd.assert().stdout(predicate::str::contains("population"));
+    }
+
+    #[test]
+    fn search_count() {
+        let mut cmd = Command::cargo_bin("galos").unwrap();
+        cmd.arg("search").args(vec!["-s", "Sothis", "-c"]);
+        cmd.assert().stdout(predicate::str::contains("1 system"));
     }
 }
