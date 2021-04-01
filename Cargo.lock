@@ -546,6 +546,7 @@ name = "edsm"
 version = "0.0.1-dev+alpha"
 dependencies = [
  "chrono",
+ "elite_journal",
  "reqwest",
  "serde",
  "serde_json",
