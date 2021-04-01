@@ -234,6 +234,24 @@
       ]
     }
   },
+  "2ee0d3ef6794b1abc3bb5056675c21f0283d7933d8478d91d160e0a9a2ad919a": {
+    "query": "SELECT count(*) FROM systems",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "334df9691fb53de236324dec9c2d8c2a55ac8b1fe6142e1fe4236d4a9e4cc10f": {
     "query": "\n            SELECT *\n            FROM factions\n            WHERE lower(name) = $1\n            ",
     "describe": {

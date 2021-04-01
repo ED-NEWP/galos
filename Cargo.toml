@@ -10,6 +10,10 @@ default-run = "galos"
 name = "galos-sync"
 path = "src/bin/galos-sync/main.rs"
 
+[dev-dependencies]
+assert_cmd = "*"
+predicates = "*"
+
 [dependencies]
 async-std = "*"
 structopt = "*"
@@ -18,8 +22,9 @@ termion   = "*"
 tui       = "*"
 
 # Subcomponents of Galos.
-galos_db  = { path = 'galos_db' }
+galos_db = { path = 'galos_db' }
 galos_bot = { path = "galos_bot" }
+# tests = { path = "tests" }
 # galos-gui     = { path = 'galos-gui' }
 # galos-server  = { path = 'galos-server' }
 # galos-worker  = { path = 'galos-worker' }
@@ -60,4 +65,5 @@ members = [
     # "galos-gui",
     # "galos-server",
     # "galos-worker",
+    # "tests"
 ]

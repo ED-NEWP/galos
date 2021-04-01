@@ -2,6 +2,25 @@
 
 Somewhere between reality and the flight sim E:D.
 
+### Testing
+
+```sh
+# All members of this workspace.
+cargo test --all -- --test-threads=1
+# Only `galos`.
+cargo test -- --test-threads=1
+# Only `elite_journal`.
+cargo test -p elite_journal
+
+# Individual tests
+
+# Tests that use the database need to set test-threads to 1.
+cargo test --tests -- --test-threads=1
+
+cargo test --lib
+cargo test --doc
+```
+
 
 ### Database Setup
 

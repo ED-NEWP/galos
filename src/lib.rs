@@ -101,3 +101,12 @@ pub trait Run {
     // TODO: Reture Error
     fn run(&self, db: &Database);
 }
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn galos_lib_test() {
+        assert!(true);
+    }
+}
