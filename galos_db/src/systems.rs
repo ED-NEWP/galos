@@ -41,9 +41,9 @@ impl System {
         primary_economy: Option<Economy>,
         secondary_economy: Option<Economy>,
         updated_at: DateTime<Utc>)
-        -> Result<(), Error>
+        -> Result<Self, Error>
     {
-        sqlx::query!(
+        let row = sqlx::query!(
             r#"
             INSERT INTO systems
                 (address,
@@ -66,6 +66,17 @@ impl System {
                 primary_economy = $8,
                 secondary_economy = $9
             WHERE systems.updated_at < $10
+            RETURNING
+                address,
+                name,
+                position AS "position!: wkb::Decode<Coordinate>",
+                population,
+                security as "security: Security",
+                government as "government: Government",
+                allegiance as "allegiance: Allegiance",
+                primary_economy as "primary_economy: Economy",
+                secondary_economy as "secondary_economy: Economy",
+                updated_at
             "#,
             address as i64,
             name,
@@ -77,14 +88,25 @@ impl System {
             primary_economy as _,
             secondary_economy as _,
             updated_at.naive_utc())
-            .execute(&db.pool)
+            .fetch_one(&db.pool)
             .await?;
 
-        Ok(())
+        Ok(System {
+            address: row.address,
+            name: row.name,
+            position: row.position.geometry.expect("not null or invalid"),
+            population: row.population.map(|n| n as u64).unwrap_or(0),
+            security: row.security,
+            government: row.government,
+            allegiance: row.allegiance,
+            primary_economy: row.primary_economy,
+            secondary_economy: row.secondary_economy,
+            updated_at: DateTime::<Utc>::from_utc(row.updated_at, Utc),
+        })
     }
 
     pub async fn from_journal(db: &Database, system: &JournalSystem, timestamp: DateTime<Utc>)
-        -> Result<(), Error>
+        -> Result<Self, Error>
     {
         let position = Coordinate {
             x: system.pos.x,
@@ -92,7 +114,7 @@ impl System {
             z: system.pos.z,
         };
         // TODO: Conflicts on pos need to do something else.
-        sqlx::query!(
+        let row = sqlx::query!(
             r#"
             INSERT INTO systems
                 (address,
@@ -114,6 +136,17 @@ impl System {
                 allegiance = $7,
                 primary_economy = $8,
                 secondary_economy = $9
+            RETURNING
+                address,
+                name,
+                position AS "position!: wkb::Decode<Coordinate>",
+                population,
+                security as "security: Security",
+                government as "government: Government",
+                allegiance as "allegiance: Allegiance",
+                primary_economy as "primary_economy: Economy",
+                secondary_economy as "secondary_economy: Economy",
+                updated_at
             "#, system.address as i64,
                 system.name,
                 wkb::Encode(position) as _,
@@ -124,7 +157,7 @@ impl System {
                 system.economy as _,
                 system.second_economy as _,
                 timestamp.naive_utc())
-            .execute(&db.pool)
+            .fetch_one(&db.pool)
             .await?;
 
         for faction in &system.factions {
@@ -138,7 +171,18 @@ impl System {
                 system.address, &conflict, timestamp).await?;
         }
 
-        Ok(())
+        Ok(System {
+            address: row.address,
+            name: row.name,
+            position: row.position.geometry.expect("not null or invalid"),
+            population: row.population.map(|n| n as u64).unwrap_or(0),
+            security: row.security,
+            government: row.government,
+            allegiance: row.allegiance,
+            primary_economy: row.primary_economy,
+            secondary_economy: row.secondary_economy,
+            updated_at: DateTime::<Utc>::from_utc(row.updated_at, Utc),
+        })
     }
 
     pub async fn fetch(db: &Database, address: i64) -> Result<Self, Error> {
