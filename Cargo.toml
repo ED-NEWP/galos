@@ -13,9 +13,13 @@ path = "src/bin/galos-sync/main.rs"
 [dependencies]
 async-std = "*"
 structopt = "*"
+chrono = "*"
+itertools = "*"
 indicatif = "*"
-termion   = "*"
-tui       = "*"
+prettytable-rs = "*"
+
+termion = "*"
+tui = "*"
 
 # Subcomponents of Galos.
 galos_db  = { path = 'galos_db' }
