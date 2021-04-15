@@ -1,0 +1,14 @@
+[Unit]
+Description=An Elite: Dangerous Database and Service
+Requires=postgresql.service
+After=postgresql.service
+
+[Service]
+Type=simple
+User=nixpulvis
+WorkingDirectory=/home/nixpulvis/projects/galos
+ExecStart=/home/nixpulvis/.cargo/bin/galos-sync eddn
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
